@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>자판기</title>
+    <link rel="stylesheet" href="styles.scss" />
+  </head>
+  <body>
+    <div class="vending-machine-system">
+      <div class="status-panel">
+        <h2>상태</h2>
+        <div class="product-status">
+          <h3>제품</h3>
+          <div class="status-item">
+            <span class="product-name">물</span>
+            <span class="product-count" data-product-id="water">10개</span>
+          </div>
+          <div class="status-item">
+            <span class="product-name">콜라</span>
+            <span class="product-count" data-product-id="coke">10개</span>
+          </div>
+          <div class="status-item">
+            <span class="product-name">커피</span>
+            <span class="product-count" data-product-id="coffee">10개</span>
+          </div>
+        </div>
+        <div class="change-status">
+          <h3>잔돈</h3>
+          <div class="status-item">
+            <span class="change-name">10000원</span>
+            <span class="change-count" data-amount="10000">10개</span>
+          </div>
+          <div class="status-item">
+            <span class="change-name">5000원</span>
+            <span class="change-count" data-amount="5000">10개</span>
+          </div>
+          <div class="status-item">
+            <span class="change-name">1000원</span>
+            <span class="change-count" data-amount="1000">10개</span>
+          </div>
+          <div class="status-item">
+            <span class="change-name">500원</span>
+            <span class="change-count" data-amount="500">10개</span>
+          </div>
+          <div class="status-item">
+            <span class="change-name">100원</span>
+            <span class="change-count" data-amount="100">10개</span>
+          </div>
+        </div>
+      </div>
+      <div class="vending-machine">
+        <div class="products">
+          <div class="product">
+            <img src="./assets/water.png" alt="물" class="product-image" />
+            <div class="product-info">
+              <div class="product-name">물</div>
+              <div class="product-price">1000원</div>
+              <button class="product-button" data-product-id="water">
+                구매
+              </button>
+            </div>
+          </div>
+          <div class="product">
+            <img src="./assets/coke.png" alt="콜라" class="product-image" />
+            <div class="product-info">
+              <div class="product-name">콜라</div>
+              <div class="product-price">1500원</div>
+              <button class="product-button" data-product-id="coke">
+                구매
+              </button>
+            </div>
+          </div>
+          <div class="product">
+            <img src="./assets/coffee.png" alt="커피" class="product-image" />
+            <div class="product-info">
+              <div class="product-name">커피</div>
+              <div class="product-price">2000원</div>
+              <button class="product-button" data-product-id="coffee">
+                구매
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="control-section">
+          <div class="display-and-card-group">
+            <div class="display-module">
+              <div class="current-balance">0원</div>
+            </div>
+            <div class="card-and-return-group">
+              <div class="card-slot-module">
+                <div class="slot-label">카드</div>
+                <div class="card-slot"></div>
+              </div>
+            </div>
+          </div>
+          <div class="money-input-group">
+            <div class="bill-input-module">
+              <div class="slot-label">지폐투입</div>
+              <div class="bill-slot"></div>
+            </div>
+            <div class="coin-input-group">
+              <div class="coin-input-module">
+                <div class="slot-label">동전투입</div>
+                <div class="coin-slot"></div>
+              </div>
+              <button class="return-button">반환</button>
+            </div>
+          </div>
+        </div>
+        <div class="output-section">
+          <div class="output-hole">
+            <div class="dispensed-drink"></div>
+          </div>
+          <div class="return-hole">
+            <div class="returned-money"></div>
+          </div>
+        </div>
+      </div>
+      <div class="user-panel">
+        <div class="card-payment-section">
+          <button class="card-button">카드 결제</button>
+          <div class="card-timer"></div>
+        </div>
+        <div class="money-input">
+          <div class="money-buttons">
+            <button class="money-button" data-amount="10000">10000원</button>
+            <button class="money-button" data-amount="5000">5000원</button>
+            <button class="money-button" data-amount="1000">1000원</button>
+            <button class="money-button" data-amount="500">500원</button>
+            <button class="money-button" data-amount="100">100원</button>
+            <button class="money-button" data-amount="50">50원</button>
+            <button class="money-button" data-amount="10">10원</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
