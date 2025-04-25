@@ -156,6 +156,7 @@ class VendingMachine {
     if (this.mode === VendingMachineMode.CARD) {
       if (!this.cardManager.canPurchase(product.price)) {
         alert("카드 잔액이 부족합니다.");
+        this.resetToIdle();
         return;
       }
       const result = this.cardManager.purchase(product.price);

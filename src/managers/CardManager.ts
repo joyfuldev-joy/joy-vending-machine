@@ -5,7 +5,7 @@ export class CardManager {
   private cardBalance: number = 0;
   private timeoutCallback: (() => void) | null = null;
   private timer: NodeJS.Timeout | null = null;
-  private remainingSeconds: number = 10;
+  private remainingSeconds: number = 60;
 
   constructor(timeoutCallback: () => void) {
     this.timeoutCallback = timeoutCallback;
@@ -63,7 +63,7 @@ export class CardManager {
    * Starts the card payment timer
    */
   private startTimer(): void {
-    this.remainingSeconds = 10;
+    this.remainingSeconds = 60;
     if (this.timer) {
       clearInterval(this.timer);
     }
