@@ -22,14 +22,11 @@ class VendingMachine {
       this.initializeEventListeners();
     }
 
-    // 초기 상태에서 모든 버튼 비활성화
     this.updateProductButtons();
     this.updateDisplay();
   }
 
-  // Initialize event listeners for buttons and slots
   private initializeEventListeners(): void {
-    // Money input buttons
     document.querySelectorAll('.money-button').forEach(button => {
       button.addEventListener('click', e => {
         const target = e.currentTarget as HTMLElement;
@@ -44,7 +41,6 @@ class VendingMachine {
       });
     });
 
-    // Product buttons
     document.querySelectorAll('.product-button').forEach(button => {
       button.addEventListener('click', e => {
         const productId = (e.currentTarget as HTMLElement).dataset.productId;
@@ -54,13 +50,11 @@ class VendingMachine {
       });
     });
 
-    // Return button
     const returnButton = document.querySelector('.return-button');
     if (returnButton) {
       returnButton.addEventListener('click', () => this.returnMoney());
     }
 
-    // Output and return holes
     const outputHole = document.querySelector('.output-hole');
     if (outputHole) {
       outputHole.addEventListener('click', () => this.removeDispensedDrink());
@@ -72,7 +66,6 @@ class VendingMachine {
     }
   }
 
-  // Handle money insertion
   private insertMoney(amount: number, currency: string): void {
     if (this.mode === VendingMachineMode.CARD) {
       if (amount >= 1000) {
@@ -99,7 +92,6 @@ class VendingMachine {
     this.updateDisplay();
   }
 
-  // Handle card insertion
   private insertCard(cardType: 'sufficient' | 'limited'): void {
     if (this.mode === VendingMachineMode.CASH) {
       alert('현재 잔액이 있어서 카드 리더기가 작동하지 않습니다.');
@@ -118,7 +110,6 @@ class VendingMachine {
     this.updateDisplay();
   }
 
-  // Start display update timer
   private startDisplayUpdate(): void {
     if (this.displayUpdateTimer) {
       clearInterval(this.displayUpdateTimer);
@@ -129,14 +120,13 @@ class VendingMachine {
       if (this.mode === VendingMachineMode.CARD) {
         const remainingSeconds = this.cardManager.getRemainingSeconds();
         if (remainingSeconds <= 0) {
-          alert('Card payment cancelled due to timeout');
+          alert('시간이 초과되어 카드 결제가 취소되었습니다.');
           this.resetToIdle();
         }
       }
     }, 1000);
   }
 
-  // Stop display update timer
   private stopDisplayUpdate(): void {
     if (this.displayUpdateTimer) {
       clearInterval(this.displayUpdateTimer);
@@ -144,7 +134,6 @@ class VendingMachine {
     }
   }
 
-  // Handle product selection
   private selectProduct(productId: string): void {
     const product = this.productManager.getProduct(productId);
     if (!product) {
@@ -192,7 +181,6 @@ class VendingMachine {
     this.updateDisplay();
   }
 
-  // Handle money return
   private returnMoney(): void {
     if (this.mode === VendingMachineMode.CARD) {
       alert('카드 결제 중에는 반환이 불가능합니다.');
@@ -207,7 +195,6 @@ class VendingMachine {
     this.updateDisplay();
   }
 
-  // Reset to idle mode
   private resetToIdle(): void {
     this.mode = VendingMachineMode.IDLE;
     this.cardManager.reset();
@@ -216,19 +203,16 @@ class VendingMachine {
     this.updateDisplay();
   }
 
-  // Remove dispensed drink
   private removeDispensedDrink(): void {
     this.productManager.clearDispensedDrinks();
     this.updateDisplay();
   }
 
-  // Clear returned money
   private clearReturnedMoney(): void {
     this.moneyManager.clearReturnedMoney();
     this.updateDisplay();
   }
 
-  // Update all displays
   private updateDisplay(): void {
     const display = document.querySelector('.current-balance');
     if (display) {
@@ -249,7 +233,6 @@ class VendingMachine {
     this.updateChangeStatus();
   }
 
-  // Update change display
   private updateChangeDisplay(): void {
     const changeCounts = this.moneyManager.getChangeCounts();
     Object.entries(changeCounts).forEach(([amount, count]) => {
@@ -260,7 +243,6 @@ class VendingMachine {
     });
   }
 
-  // Update card timer display
   private updateCardTimerDisplay(): void {
     const timerElement = document.querySelector('.card-timer');
     if (timerElement) {
@@ -275,7 +257,6 @@ class VendingMachine {
     }
   }
 
-  // Update output hole display
   private updateOutputHoleDisplay(): void {
     const outputHole = document.querySelector('.output-hole');
     const dispensedDrinkElement = document.querySelector('.dispensed-drink');
@@ -300,7 +281,6 @@ class VendingMachine {
     }
   }
 
-  // Update return hole display
   private updateReturnHoleDisplay(): void {
     const returnHole = document.querySelector('.return-hole');
     const returnedMoneyDisplay = document.querySelector('.returned-money');
@@ -322,7 +302,6 @@ class VendingMachine {
     }
   }
 
-  // Update product buttons state
   private updateProductButtons(): void {
     const productButtons = document.querySelectorAll('.product-button');
     productButtons.forEach(button => {
@@ -359,7 +338,6 @@ class VendingMachine {
     });
   }
 
-  // Update stock display
   private updateStockDisplay(): void {
     this.productManager.getAllProducts().forEach(product => {
       const stockElement = document.querySelector(
@@ -371,7 +349,6 @@ class VendingMachine {
     });
   }
 
-  // Update product status
   private updateProductStatus(): void {
     const productStatus = document.querySelector('.product-status') as HTMLElement;
     if (!productStatus) return;
@@ -389,7 +366,6 @@ class VendingMachine {
     });
   }
 
-  // Update change status
   private updateChangeStatus(): void {
     const changeStatus = document.querySelector('.change-status') as HTMLElement;
     if (!changeStatus) return;
@@ -411,5 +387,4 @@ class VendingMachine {
   }
 }
 
-// Create vending machine instance
 new VendingMachine();
