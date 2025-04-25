@@ -9,6 +9,7 @@ class VendingMachine {
   private productManager: ProductManager;
   private cardManager: CardManager;
   private mode: VendingMachineMode = VendingMachineMode.IDLE;
+  private displayUpdateTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.moneyManager = new MoneyManager();
@@ -20,6 +21,9 @@ class VendingMachine {
     } else {
       this.initializeEventListeners();
     }
+
+    // 초기 상태에서 모든 버튼 비활성화
+    this.updateProductButtons();
     this.updateDisplay();
   }
 
@@ -27,20 +31,15 @@ class VendingMachine {
     // 돈 투입 버튼들
     document.querySelectorAll('.money-button').forEach(button => {
       button.addEventListener('click', e => {
-        const target = e.target as HTMLElement;
+        const target = e.currentTarget as HTMLElement;
+        const cardType = target.dataset.cardType;
+        if (cardType) {
+          this.insertCard(cardType as 'sufficient' | 'limited');
+          return;
+        }
         const amount = parseInt(target.dataset.amount || '0');
         const currency = target.dataset.currency || 'KRW';
         this.insertMoney(amount, currency);
-      });
-    });
-
-    // 카드 버튼들
-    document.querySelectorAll('.card-button').forEach(button => {
-      button.addEventListener('click', e => {
-        const cardType = (e.currentTarget as HTMLElement).dataset.cardType as
-          | 'sufficient'
-          | 'limited';
-        this.insertCard(cardType);
       });
     });
 
@@ -108,11 +107,37 @@ class VendingMachine {
     const result = this.cardManager.insertCard(cardType);
     if (result.success) {
       this.mode = VendingMachineMode.CARD;
+      this.moneyManager.setCardMode(true);
+      this.startDisplayUpdate();
     }
     if (result.message) {
       alert(result.message);
     }
     this.updateDisplay();
+  }
+
+  private startDisplayUpdate(): void {
+    if (this.displayUpdateTimer) {
+      clearInterval(this.displayUpdateTimer);
+    }
+
+    this.displayUpdateTimer = setInterval(() => {
+      this.updateDisplay();
+      if (this.mode === VendingMachineMode.CARD) {
+        const remainingSeconds = this.cardManager.getRemainingSeconds();
+        if (remainingSeconds <= 0) {
+          alert('시간이 초과되어 카드 결제가 취소되었습니다.');
+          this.resetToIdle();
+        }
+      }
+    }, 1000);
+  }
+
+  private stopDisplayUpdate(): void {
+    if (this.displayUpdateTimer) {
+      clearInterval(this.displayUpdateTimer);
+      this.displayUpdateTimer = null;
+    }
   }
 
   private selectProduct(productId: string): void {
@@ -128,6 +153,11 @@ class VendingMachine {
     }
 
     if (this.mode === VendingMachineMode.CARD) {
+      if (!this.cardManager.canPurchase(product.price)) {
+        alert('카드 잔액이 부족합니다.');
+        this.resetToIdle();
+        return;
+      }
       const result = this.cardManager.purchase(product.price);
       if (result.success) {
         this.productManager.purchase(productId);
@@ -175,6 +205,8 @@ class VendingMachine {
   private resetToIdle(): void {
     this.mode = VendingMachineMode.IDLE;
     this.cardManager.reset();
+    this.moneyManager.setCardMode(false);
+    this.stopDisplayUpdate();
     this.updateDisplay();
   }
 
@@ -199,18 +231,6 @@ class VendingMachine {
       }
     }
 
-    // Update card buttons state
-    const cardButtons = document.querySelectorAll('.card-button');
-    cardButtons.forEach(button => {
-      if (this.mode !== VendingMachineMode.IDLE) {
-        button.setAttribute('disabled', 'true');
-        button.classList.add('disabled');
-      } else {
-        button.removeAttribute('disabled');
-        button.classList.remove('disabled');
-      }
-    });
-
     // Update product buttons state
     this.updateProductButtons();
 
@@ -228,6 +248,12 @@ class VendingMachine {
 
     // Update card timer display
     this.updateCardTimerDisplay();
+
+    // Update product status
+    this.updateProductStatus();
+
+    // Update change status
+    this.updateChangeStatus();
   }
 
   private updateChangeDisplay(): void {
@@ -244,10 +270,12 @@ class VendingMachine {
     const timerElement = document.querySelector('.card-timer');
     if (timerElement) {
       if (this.mode === VendingMachineMode.CARD) {
-        timerElement.textContent = `${this.cardManager.getRemainingSeconds()}초`;
+        const remainingSeconds = this.cardManager.getRemainingSeconds();
+        timerElement.textContent = `${remainingSeconds}초`;
         timerElement.classList.add('visible');
       } else {
         timerElement.classList.remove('visible');
+        timerElement.textContent = '';
       }
     }
   }
@@ -259,7 +287,15 @@ class VendingMachine {
     if (outputHole && dispensedDrinkElement) {
       if (this.productManager.hasDispensedDrinks()) {
         outputHole.classList.add('has-product');
-        dispensedDrinkElement.innerHTML = this.productManager.getDispensedDrinksDisplay();
+        const drinks = this.productManager.getDispensedDrinks();
+        const displayText = Object.entries(drinks)
+          .map(([id, count]) => {
+            const product = this.productManager.getProduct(id);
+            return product ? `${product.name} x ${count}` : '';
+          })
+          .filter(text => text)
+          .join('<br>');
+        dispensedDrinkElement.innerHTML = displayText;
         dispensedDrinkElement.classList.add('visible');
       } else {
         outputHole.classList.remove('has-product');
@@ -278,7 +314,7 @@ class VendingMachine {
         returnHole.classList.add('has-money');
         const moneyText = Object.entries(returnedMoney)
           .sort(([a], [b]) => parseInt(b) - parseInt(a))
-          .map(([amount, count]) => `${amount}원 ${count}개`)
+          .map(([amount, count]) => `${amount}원 x ${count}`)
           .join('<br>');
         returnedMoneyDisplay.innerHTML = moneyText;
         returnedMoneyDisplay.classList.add('visible');
@@ -298,40 +334,41 @@ class VendingMachine {
       const product = this.productManager.getProduct(productId);
       if (!product) return;
 
+      // 모든 상태 클래스 제거
+      button.classList.remove('disabled', 'insufficient-balance', 'sold-out');
+
       if (!this.productManager.canPurchase(productId)) {
-        button.setAttribute('disabled', 'true');
-        button.classList.add('disabled');
-        button.textContent = '구매불가';
+        button.classList.add('sold-out');
+        button.textContent = '품절';
         return;
       }
 
-      if (this.mode === VendingMachineMode.CARD) {
-        if (this.cardManager.canPurchase(product.price)) {
-          button.removeAttribute('disabled');
-          button.classList.remove('disabled');
-          button.textContent = '구매';
-        } else {
-          button.setAttribute('disabled', 'true');
-          button.classList.add('disabled');
-          button.textContent = '구매';
-        }
+      // IDLE 모드에서는 버튼 비활성화
+      if (this.mode === VendingMachineMode.IDLE) {
+        button.classList.add('disabled');
+        button.setAttribute('disabled', 'true');
+        button.textContent = '구매';
         return;
       }
 
-      const canAfford = this.moneyManager.getBalance() >= product.price;
-      const canMakeChange = this.moneyManager.canMakeChange(
-        this.moneyManager.getBalance() - product.price
-      );
-
-      if (canAfford && canMakeChange) {
-        button.removeAttribute('disabled');
-        button.classList.remove('disabled');
-        button.textContent = '구매';
-      } else {
+      // CASH 모드에서 잔액 부족 체크
+      if (this.mode === VendingMachineMode.CASH && this.moneyManager.getBalance() < product.price) {
+        button.classList.add('insufficient-balance');
         button.setAttribute('disabled', 'true');
-        button.classList.add('disabled');
         button.textContent = '구매';
+        return;
       }
+
+      // CARD 모드에서 카드 잔액 부족 체크
+      if (this.mode === VendingMachineMode.CARD && !this.cardManager.canPurchase(product.price)) {
+        button.classList.add('insufficient-balance');
+        button.setAttribute('disabled', 'true');
+        button.textContent = '구매';
+        return;
+      }
+
+      button.removeAttribute('disabled');
+      button.textContent = '구매';
     });
   }
 
@@ -343,6 +380,47 @@ class VendingMachine {
       if (stockElement) {
         stockElement.textContent = `${product.quantity}개`;
       }
+    });
+  }
+
+  private updateProductStatus(): void {
+    const productStatus = document.querySelector('.product-status') as HTMLElement;
+    if (!productStatus) return;
+
+    // Clear existing content
+    productStatus.innerHTML = '<h3>제품</h3>';
+
+    // Add product status items
+    this.productManager.getProducts().forEach(product => {
+      const statusItem = document.createElement('div');
+      statusItem.className = 'status-item';
+      statusItem.innerHTML = `
+        <span class="product-name">${product.name}</span>
+        <span class="product-count" data-product-id="${product.id}">x ${product.quantity}</span>
+      `;
+      productStatus.appendChild(statusItem);
+    });
+  }
+
+  private updateChangeStatus(): void {
+    const changeStatus = document.querySelector('.change-status') as HTMLElement;
+    if (!changeStatus) return;
+
+    // Clear existing content
+    changeStatus.innerHTML = '<h3>잔돈</h3>';
+
+    // Add change status items
+    const denominations = [10000, 5000, 1000, 500, 100];
+    const changeCounts = this.moneyManager.getChangeCounts();
+
+    denominations.forEach(amount => {
+      const statusItem = document.createElement('div');
+      statusItem.className = 'status-item';
+      statusItem.innerHTML = `
+        <span class="change-name">${amount.toLocaleString()}원</span>
+        <span class="change-count" data-amount="${amount}">x ${changeCounts[amount] || 0}</span>
+      `;
+      changeStatus.appendChild(statusItem);
     });
   }
 }

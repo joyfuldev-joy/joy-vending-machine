@@ -70,9 +70,17 @@ export class ProductManager {
     return Object.entries(this.dispensedDrinks)
       .map(([id, count]) => {
         const product = this.getProduct(id);
-        return product ? `${product.name} ${count}개` : '';
+        return product ? `${product.name} x ${count}` : '';
       })
       .filter(text => text)
-      .join('\n');
+      .join('<br>');
+  }
+
+  /**
+   * Get all products
+   * @returns Array of all products
+   */
+  getProducts(): Product[] {
+    return Object.values(this.products);
   }
 }

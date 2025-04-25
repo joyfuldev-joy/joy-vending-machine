@@ -9,44 +9,13 @@
   <body>
     <div class="vending-machine-system">
       <div class="status-panel">
-        <h2>상태</h2>
+        <h2>자판기 관리</h2>
         <div class="product-status">
-          <h3>제품</h3>
-          <div class="status-item">
-            <span class="product-name">물</span>
-            <span class="product-count" data-product-id="water">10개</span>
-          </div>
-          <div class="status-item">
-            <span class="product-name">콜라</span>
-            <span class="product-count" data-product-id="coke">10개</span>
-          </div>
-          <div class="status-item">
-            <span class="product-name">커피</span>
-            <span class="product-count" data-product-id="coffee">10개</span>
-          </div>
+          <!-- Product status will be dynamically generated -->
         </div>
+        <div class="divider"></div>
         <div class="change-status">
-          <h3>잔돈</h3>
-          <div class="status-item">
-            <span class="change-name">10000원</span>
-            <span class="change-count" data-amount="10000">10개</span>
-          </div>
-          <div class="status-item">
-            <span class="change-name">5000원</span>
-            <span class="change-count" data-amount="5000">10개</span>
-          </div>
-          <div class="status-item">
-            <span class="change-name">1000원</span>
-            <span class="change-count" data-amount="1000">10개</span>
-          </div>
-          <div class="status-item">
-            <span class="change-name">500원</span>
-            <span class="change-count" data-amount="500">10개</span>
-          </div>
-          <div class="status-item">
-            <span class="change-name">100원</span>
-            <span class="change-count" data-amount="100">10개</span>
-          </div>
+          <!-- Change status will be dynamically generated -->
         </div>
       </div>
       <div class="vending-machine">
@@ -76,7 +45,10 @@
         <div class="control-section">
           <div class="display-and-card-group">
             <div class="display-module">
-              <div class="current-balance">0원</div>
+              <div class="display-content">
+                <div class="current-balance">0원</div>
+                <div class="card-timer"></div>
+              </div>
             </div>
             <div class="card-and-return-group">
               <div class="card-slot-module">
@@ -110,10 +82,10 @@
       </div>
       <div class="user-panel">
         <div class="card-payment">
-          <h3>카드 리딩</h3>
-          <div class="card-inputs">
-            <button class="card-button" data-card-type="sufficient">잔액이 충분한 카드</button>
-            <button class="card-button" data-card-type="limited">잔액 1000원 카드</button>
+          <h3>카드 투입</h3>
+          <div class="money-buttons">
+            <button class="money-button" data-card-type="sufficient">잔액충분 카드</button>
+            <button class="money-button" data-card-type="limited">잔액 1000원 카드</button>
           </div>
         </div>
         <div class="money-input">

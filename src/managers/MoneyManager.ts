@@ -1,15 +1,14 @@
 export class MoneyManager {
   private balance: number = 0;
   private readonly MAX_BALANCE = 10000;
-  private readonly VALID_BILLS = [1000, 5000, 10000];
-  private readonly VALID_COINS = [100, 500];
-  private readonly VALID_DENOMINATIONS: number[];
+  private readonly VALID_COINS = [100, 500] as const;
+  private readonly VALID_BILLS = [1000, 5000, 10000] as const;
   private changeCounts: { [key: number]: number };
   private returnedMoney: { [key: number]: number } = {};
   private insertedMoney: { [key: number]: number } = {};
+  private isCardMode: boolean = false;
 
   constructor() {
-    this.VALID_DENOMINATIONS = [...this.VALID_BILLS, ...this.VALID_COINS];
     this.changeCounts = {
       10000: 10,
       5000: 10,
@@ -19,66 +18,95 @@ export class MoneyManager {
     };
   }
 
+  /**
+   * Inserts money into the vending machine
+   * @param amount Amount of money to insert
+   * @param currency Currency type
+   */
   insertMoney(amount: number, currency: string): { success: boolean; message?: string } {
-    let inputAmount = amount;
-    let displayAmount = currency === 'KRW' ? `${amount}원을` : `${amount}달러를`;
+    // Check if currency is KRW
+    if (currency !== 'KRW') {
+      return {
+        success: false,
+        message: '한국 화폐만 사용 가능합니다.',
+      };
+    }
 
-    // 작은 금액은 바로 반환
-    if ((currency === 'KRW' && amount <= 50) || (currency === 'USD' && amount <= 0.5)) {
+    // Check if in card mode
+    if (this.isCardMode) {
+      // If it's a bill, reject it
+      if (amount >= 1000) {
+        return {
+          success: false,
+          message: '카드 결제 중에는 지폐를 투입할 수 없습니다.',
+        };
+      }
+      // If it's a coin, return it
       this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
       return {
         success: false,
-        message: `${displayAmount} 받을 수 없어서 반환구로 나왔습니다.`,
+        message: '카드 결제 중에는 동전이 반환됩니다.',
       };
     }
-
-    // 유효한 화폐인지 확인
-    if (!this.VALID_DENOMINATIONS.includes(inputAmount)) {
-      return {
-        success: false,
-        message: `자판기가 ${displayAmount} 지원하지 않아서, 바로 반환되었습니다.`,
-      };
-    }
-
-    const newBalance = this.balance + inputAmount;
-
-    // 만원 초과 시 처리
-    if (newBalance > this.MAX_BALANCE) {
-      if (inputAmount >= 1000) {
+    // Check for valid bills
+    if (amount >= 1000) {
+      if (!this.VALID_BILLS.includes(amount as (typeof this.VALID_BILLS)[number])) {
         return {
           success: false,
-          message: '이 자판기는 만원이 최대여서, 더 이상 투입할 수 없습니다.',
+          message: '지원하지 않는 지폐입니다.',
         };
-      } else {
-        this.returnedMoney[inputAmount] = (this.returnedMoney[inputAmount] || 0) + 1;
+      }
+    } else {
+      if (!this.VALID_COINS.includes(amount as (typeof this.VALID_COINS)[number])) {
+        this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
         return {
           success: false,
-          message: `만원이 최대여서 ${displayAmount} 반환구로 나왔습니다.`,
+          message: '지원하지 않는 동전입니다.',
         };
       }
     }
-
-    // Track inserted money
-    if (!this.insertedMoney[inputAmount]) {
-      this.insertedMoney[inputAmount] = 0;
+    // Check if adding this amount would exceed the maximum balance
+    if (this.balance + amount > this.MAX_BALANCE) {
+      // For bills, reject immediately
+      if (amount >= 1000) {
+        return {
+          success: false,
+          message: '잔액이 10,000원을 초과하여 지폐를 투입할 수 없습니다.',
+        };
+      }
+      // For coins, return them
+      this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
+      return {
+        success: false,
+        message: '잔액이 10,000원을 초과하여 동전이 반환됩니다.',
+      };
     }
-    this.insertedMoney[inputAmount]++;
 
-    // Update change counts
-    this.changeCounts[inputAmount]++;
+    // Check for valid coins
 
-    this.balance = newBalance;
+    // Add the money to the balance and track the count
+    this.balance += amount;
+    this.insertedMoney[amount] = (this.insertedMoney[amount] || 0) + 1;
+    this.changeCounts[amount] = (this.changeCounts[amount] || 0) + 1;
+
     return { success: true };
+  }
+
+  /**
+   * Sets the card mode status
+   * @param isCardMode Whether the machine is in card mode
+   */
+  setCardMode(isCardMode: boolean): void {
+    this.isCardMode = isCardMode;
   }
 
   returnMoney(): { returnedMoney: { [key: number]: number }; message: string } {
     if (this.balance === 0) {
-      return { returnedMoney: {}, message: '' };
+      return { returnedMoney: this.returnedMoney, message: '' };
     }
 
     let remainingAmount = this.balance;
     const denominations = [10000, 5000, 1000, 500, 100];
-    this.returnedMoney = {};
 
     // Try to give change using largest denominations first
     denominations.forEach(denomination => {
@@ -88,7 +116,8 @@ export class MoneyManager {
           this.changeCounts[denomination]
         );
         if (count > 0) {
-          this.returnedMoney[denomination] = count;
+          // Add to existing returned money instead of overwriting
+          this.returnedMoney[denomination] = (this.returnedMoney[denomination] || 0) + count;
           remainingAmount -= denomination * count;
           this.changeCounts[denomination] -= count;
         }
