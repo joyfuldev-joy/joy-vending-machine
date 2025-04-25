@@ -27,8 +27,9 @@ class VendingMachine {
     this.updateDisplay();
   }
 
+  // Initialize event listeners for buttons and slots
   private initializeEventListeners(): void {
-    // 돈 투입 버튼들
+    // Money input buttons
     document.querySelectorAll('.money-button').forEach(button => {
       button.addEventListener('click', e => {
         const target = e.currentTarget as HTMLElement;
@@ -43,7 +44,7 @@ class VendingMachine {
       });
     });
 
-    // 제품 버튼들
+    // Product buttons
     document.querySelectorAll('.product-button').forEach(button => {
       button.addEventListener('click', e => {
         const productId = (e.currentTarget as HTMLElement).dataset.productId;
@@ -53,25 +54,25 @@ class VendingMachine {
       });
     });
 
-    // 반환 버튼
+    // Return button
     const returnButton = document.querySelector('.return-button');
     if (returnButton) {
       returnButton.addEventListener('click', () => this.returnMoney());
     }
 
-    // 음료 배출구
+    // Output and return holes
     const outputHole = document.querySelector('.output-hole');
     if (outputHole) {
       outputHole.addEventListener('click', () => this.removeDispensedDrink());
     }
 
-    // 반환구
     const returnHole = document.querySelector('.return-hole');
     if (returnHole) {
       returnHole.addEventListener('click', () => this.clearReturnedMoney());
     }
   }
 
+  // Handle money insertion
   private insertMoney(amount: number, currency: string): void {
     if (this.mode === VendingMachineMode.CARD) {
       if (amount >= 1000) {
@@ -98,6 +99,7 @@ class VendingMachine {
     this.updateDisplay();
   }
 
+  // Handle card insertion
   private insertCard(cardType: 'sufficient' | 'limited'): void {
     if (this.mode === VendingMachineMode.CASH) {
       alert('현재 잔액이 있어서 카드 리더기가 작동하지 않습니다.');
@@ -116,6 +118,7 @@ class VendingMachine {
     this.updateDisplay();
   }
 
+  // Start display update timer
   private startDisplayUpdate(): void {
     if (this.displayUpdateTimer) {
       clearInterval(this.displayUpdateTimer);
@@ -126,13 +129,14 @@ class VendingMachine {
       if (this.mode === VendingMachineMode.CARD) {
         const remainingSeconds = this.cardManager.getRemainingSeconds();
         if (remainingSeconds <= 0) {
-          alert('시간이 초과되어 카드 결제가 취소되었습니다.');
+          alert('Card payment cancelled due to timeout');
           this.resetToIdle();
         }
       }
     }, 1000);
   }
 
+  // Stop display update timer
   private stopDisplayUpdate(): void {
     if (this.displayUpdateTimer) {
       clearInterval(this.displayUpdateTimer);
@@ -140,6 +144,7 @@ class VendingMachine {
     }
   }
 
+  // Handle product selection
   private selectProduct(productId: string): void {
     const product = this.productManager.getProduct(productId);
     if (!product) {
@@ -155,7 +160,6 @@ class VendingMachine {
     if (this.mode === VendingMachineMode.CARD) {
       if (!this.cardManager.canPurchase(product.price)) {
         alert('카드 잔액이 부족합니다.');
-        this.resetToIdle();
         return;
       }
       const result = this.cardManager.purchase(product.price);
@@ -188,6 +192,7 @@ class VendingMachine {
     this.updateDisplay();
   }
 
+  // Handle money return
   private returnMoney(): void {
     if (this.mode === VendingMachineMode.CARD) {
       alert('카드 결제 중에는 반환이 불가능합니다.');
@@ -202,6 +207,7 @@ class VendingMachine {
     this.updateDisplay();
   }
 
+  // Reset to idle mode
   private resetToIdle(): void {
     this.mode = VendingMachineMode.IDLE;
     this.cardManager.reset();
@@ -210,18 +216,20 @@ class VendingMachine {
     this.updateDisplay();
   }
 
+  // Remove dispensed drink
   private removeDispensedDrink(): void {
     this.productManager.clearDispensedDrinks();
     this.updateDisplay();
   }
 
+  // Clear returned money
   private clearReturnedMoney(): void {
     this.moneyManager.clearReturnedMoney();
     this.updateDisplay();
   }
 
+  // Update all displays
   private updateDisplay(): void {
-    // Update current balance or card status
     const display = document.querySelector('.current-balance');
     if (display) {
       if (this.mode === VendingMachineMode.CARD) {
@@ -231,31 +239,17 @@ class VendingMachine {
       }
     }
 
-    // Update product buttons state
     this.updateProductButtons();
-
-    // Update product quantities
     this.updateStockDisplay();
-
-    // Update change counts
     this.updateChangeDisplay();
-
-    // Update output hole LED and display
     this.updateOutputHoleDisplay();
-
-    // Update return hole LED and display
     this.updateReturnHoleDisplay();
-
-    // Update card timer display
     this.updateCardTimerDisplay();
-
-    // Update product status
     this.updateProductStatus();
-
-    // Update change status
     this.updateChangeStatus();
   }
 
+  // Update change display
   private updateChangeDisplay(): void {
     const changeCounts = this.moneyManager.getChangeCounts();
     Object.entries(changeCounts).forEach(([amount, count]) => {
@@ -266,6 +260,7 @@ class VendingMachine {
     });
   }
 
+  // Update card timer display
   private updateCardTimerDisplay(): void {
     const timerElement = document.querySelector('.card-timer');
     if (timerElement) {
@@ -280,6 +275,7 @@ class VendingMachine {
     }
   }
 
+  // Update output hole display
   private updateOutputHoleDisplay(): void {
     const outputHole = document.querySelector('.output-hole');
     const dispensedDrinkElement = document.querySelector('.dispensed-drink');
@@ -304,6 +300,7 @@ class VendingMachine {
     }
   }
 
+  // Update return hole display
   private updateReturnHoleDisplay(): void {
     const returnHole = document.querySelector('.return-hole');
     const returnedMoneyDisplay = document.querySelector('.returned-money');
@@ -325,6 +322,7 @@ class VendingMachine {
     }
   }
 
+  // Update product buttons state
   private updateProductButtons(): void {
     const productButtons = document.querySelectorAll('.product-button');
     productButtons.forEach(button => {
@@ -334,7 +332,6 @@ class VendingMachine {
       const product = this.productManager.getProduct(productId);
       if (!product) return;
 
-      // 모든 상태 클래스 제거
       button.classList.remove('disabled', 'insufficient-balance', 'sold-out');
 
       if (!this.productManager.canPurchase(productId)) {
@@ -343,7 +340,6 @@ class VendingMachine {
         return;
       }
 
-      // IDLE 모드에서는 버튼 비활성화
       if (this.mode === VendingMachineMode.IDLE) {
         button.classList.add('disabled');
         button.setAttribute('disabled', 'true');
@@ -351,16 +347,7 @@ class VendingMachine {
         return;
       }
 
-      // CASH 모드에서 잔액 부족 체크
       if (this.mode === VendingMachineMode.CASH && this.moneyManager.getBalance() < product.price) {
-        button.classList.add('insufficient-balance');
-        button.setAttribute('disabled', 'true');
-        button.textContent = '구매';
-        return;
-      }
-
-      // CARD 모드에서 카드 잔액 부족 체크
-      if (this.mode === VendingMachineMode.CARD && !this.cardManager.canPurchase(product.price)) {
         button.classList.add('insufficient-balance');
         button.setAttribute('disabled', 'true');
         button.textContent = '구매';
@@ -372,6 +359,7 @@ class VendingMachine {
     });
   }
 
+  // Update stock display
   private updateStockDisplay(): void {
     this.productManager.getAllProducts().forEach(product => {
       const stockElement = document.querySelector(
@@ -383,14 +371,13 @@ class VendingMachine {
     });
   }
 
+  // Update product status
   private updateProductStatus(): void {
     const productStatus = document.querySelector('.product-status') as HTMLElement;
     if (!productStatus) return;
 
-    // Clear existing content
     productStatus.innerHTML = '<h3>제품</h3>';
 
-    // Add product status items
     this.productManager.getProducts().forEach(product => {
       const statusItem = document.createElement('div');
       statusItem.className = 'status-item';
@@ -402,14 +389,13 @@ class VendingMachine {
     });
   }
 
+  // Update change status
   private updateChangeStatus(): void {
     const changeStatus = document.querySelector('.change-status') as HTMLElement;
     if (!changeStatus) return;
 
-    // Clear existing content
     changeStatus.innerHTML = '<h3>잔돈</h3>';
 
-    // Add change status items
     const denominations = [10000, 5000, 1000, 500, 100];
     const changeCounts = this.moneyManager.getChangeCounts();
 
@@ -425,5 +411,5 @@ class VendingMachine {
   }
 }
 
-// 자판기 인스턴스 생성
+// Create vending machine instance
 new VendingMachine();

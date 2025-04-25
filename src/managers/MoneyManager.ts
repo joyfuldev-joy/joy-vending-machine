@@ -24,7 +24,6 @@ export class MoneyManager {
    * @param currency Currency type
    */
   insertMoney(amount: number, currency: string): { success: boolean; message?: string } {
-    // Check if currency is KRW
     if (currency !== 'KRW') {
       return {
         success: false,
@@ -32,23 +31,20 @@ export class MoneyManager {
       };
     }
 
-    // Check if in card mode
     if (this.isCardMode) {
-      // If it's a bill, reject it
       if (amount >= 1000) {
         return {
           success: false,
           message: '카드 결제 중에는 지폐를 투입할 수 없습니다.',
         };
       }
-      // If it's a coin, return it
       this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
       return {
         success: false,
         message: '카드 결제 중에는 동전이 반환됩니다.',
       };
     }
-    // Check for valid bills
+
     if (amount >= 1000) {
       if (!this.VALID_BILLS.includes(amount as (typeof this.VALID_BILLS)[number])) {
         return {
@@ -65,16 +61,14 @@ export class MoneyManager {
         };
       }
     }
-    // Check if adding this amount would exceed the maximum balance
+
     if (this.balance + amount > this.MAX_BALANCE) {
-      // For bills, reject immediately
       if (amount >= 1000) {
         return {
           success: false,
           message: '잔액이 10,000원을 초과하여 지폐를 투입할 수 없습니다.',
         };
       }
-      // For coins, return them
       this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
       return {
         success: false,
@@ -82,9 +76,6 @@ export class MoneyManager {
       };
     }
 
-    // Check for valid coins
-
-    // Add the money to the balance and track the count
     this.balance += amount;
     this.insertedMoney[amount] = (this.insertedMoney[amount] || 0) + 1;
     this.changeCounts[amount] = (this.changeCounts[amount] || 0) + 1;
@@ -100,6 +91,9 @@ export class MoneyManager {
     this.isCardMode = isCardMode;
   }
 
+  /**
+   * Returns money to the user
+   */
   returnMoney(): { returnedMoney: { [key: number]: number }; message: string } {
     if (this.balance === 0) {
       return { returnedMoney: this.returnedMoney, message: '' };
@@ -108,7 +102,6 @@ export class MoneyManager {
     let remainingAmount = this.balance;
     const denominations = [10000, 5000, 1000, 500, 100];
 
-    // Try to give change using largest denominations first
     denominations.forEach(denomination => {
       if (remainingAmount >= denomination && this.changeCounts[denomination] > 0) {
         const count = Math.min(
@@ -116,7 +109,6 @@ export class MoneyManager {
           this.changeCounts[denomination]
         );
         if (count > 0) {
-          // Add to existing returned money instead of overwriting
           this.returnedMoney[denomination] = (this.returnedMoney[denomination] || 0) + count;
           remainingAmount -= denomination * count;
           this.changeCounts[denomination] -= count;
@@ -134,26 +126,46 @@ export class MoneyManager {
     };
   }
 
+  /**
+   * Deducts amount from balance
+   * @param amount Amount to deduct
+   */
   deductBalance(amount: number): void {
     this.balance -= amount;
   }
 
+  /**
+   * Gets current balance
+   */
   getBalance(): number {
     return this.balance;
   }
 
+  /**
+   * Gets returned money
+   */
   getReturnedMoney(): { [key: number]: number } {
     return { ...this.returnedMoney };
   }
 
+  /**
+   * Clears returned money
+   */
   clearReturnedMoney(): void {
     this.returnedMoney = {};
   }
 
+  /**
+   * Gets change counts
+   */
   getChangeCounts(): { [key: number]: number } {
     return { ...this.changeCounts };
   }
 
+  /**
+   * Checks if change can be made
+   * @param amount Amount to check
+   */
   canMakeChange(amount: number): boolean {
     let remainingAmount = amount;
     const denominations = [10000, 5000, 1000, 500, 100];
