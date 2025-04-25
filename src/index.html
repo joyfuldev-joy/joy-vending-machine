@@ -23,22 +23,28 @@
           <div class="product">
             <img src="./assets/water.png" alt="물" class="product-image" />
             <div class="product-info">
-              <div class="product-price">1000원</div>
-              <button class="product-button" data-product-id="water">구매</button>
+              <div class="product-price">600원</div>
+              <button class="product-button" data-product-id="water">
+                구매
+              </button>
             </div>
           </div>
           <div class="product">
             <img src="./assets/coke.png" alt="콜라" class="product-image" />
             <div class="product-info">
-              <div class="product-price">1500원</div>
-              <button class="product-button" data-product-id="coke">구매</button>
+              <div class="product-price">1,100원</div>
+              <button class="product-button" data-product-id="cola">
+                구매
+              </button>
             </div>
           </div>
           <div class="product">
             <img src="./assets/coffee.png" alt="커피" class="product-image" />
             <div class="product-info">
-              <div class="product-price">2000원</div>
-              <button class="product-button" data-product-id="coffee">구매</button>
+              <div class="product-price">700원</div>
+              <button class="product-button" data-product-id="coffee">
+                구매
+              </button>
             </div>
           </div>
         </div>
@@ -81,28 +87,67 @@
         </div>
       </div>
       <div class="user-panel">
+        <h2>결제 액션</h2>
         <div class="card-payment">
           <h3>카드 투입</h3>
           <div class="money-buttons">
-            <button class="money-button" data-card-type="sufficient">잔액충분 카드</button>
-            <button class="money-button" data-card-type="limited">잔액 1000원 카드</button>
+            <button
+              class="money-button"
+              data-card-type="sufficient"
+              data-balance="10000"
+            >
+              잔액충분 카드
+            </button>
+            <button
+              class="money-button"
+              data-card-type="limited"
+              data-balance="1000"
+            >
+              잔액 1000원 카드
+            </button>
           </div>
         </div>
         <div class="money-input">
           <h3>지폐투입</h3>
           <div class="money-buttons bill-buttons">
-            <button class="money-button" data-amount="50000" data-currency="KRW">₩50,000</button>
-            <button class="money-button" data-amount="10000" data-currency="KRW">₩10,000</button>
-            <button class="money-button" data-amount="5000" data-currency="KRW">₩5,000</button>
-            <button class="money-button" data-amount="1000" data-currency="KRW">₩1,000</button>
-            <button class="money-button" data-amount="1" data-currency="USD">$1</button>
+            <button
+              class="money-button"
+              data-amount="50000"
+              data-currency="KRW"
+            >
+              ₩50,000
+            </button>
+            <button
+              class="money-button"
+              data-amount="10000"
+              data-currency="KRW"
+            >
+              ₩10,000
+            </button>
+            <button class="money-button" data-amount="5000" data-currency="KRW">
+              ₩5,000
+            </button>
+            <button class="money-button" data-amount="1000" data-currency="KRW">
+              ₩1,000
+            </button>
+            <button class="money-button" data-amount="1" data-currency="USD">
+              $1
+            </button>
           </div>
           <h3>동전투입</h3>
           <div class="money-buttons coin-buttons">
-            <button class="money-button" data-amount="500" data-currency="KRW">₩500</button>
-            <button class="money-button" data-amount="100" data-currency="KRW">₩100</button>
-            <button class="money-button" data-amount="50" data-currency="KRW">₩50</button>
-            <button class="money-button" data-amount="10" data-currency="KRW">₩10</button>
+            <button class="money-button" data-amount="500" data-currency="KRW">
+              ₩500
+            </button>
+            <button class="money-button" data-amount="100" data-currency="KRW">
+              ₩100
+            </button>
+            <button class="money-button" data-amount="50" data-currency="KRW">
+              ₩50
+            </button>
+            <button class="money-button" data-amount="10" data-currency="KRW">
+              ₩10
+            </button>
           </div>
         </div>
       </div>

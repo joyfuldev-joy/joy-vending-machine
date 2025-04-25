@@ -23,11 +23,14 @@ export class MoneyManager {
    * @param amount Amount of money to insert
    * @param currency Currency type
    */
-  insertMoney(amount: number, currency: string): { success: boolean; message?: string } {
-    if (currency !== 'KRW') {
+  insertMoney(
+    amount: number,
+    currency: string
+  ): { success: boolean; message?: string } {
+    if (currency !== "KRW") {
       return {
         success: false,
-        message: '한국 화폐만 사용 가능합니다.',
+        message: "한국 화폐만 사용 가능합니다.",
       };
     }
 
@@ -35,29 +38,33 @@ export class MoneyManager {
       if (amount >= 1000) {
         return {
           success: false,
-          message: '카드 결제 중에는 지폐를 투입할 수 없습니다.',
+          message: "카드 결제 중에는 지폐를 투입할 수 없습니다.",
         };
       }
       this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
       return {
         success: false,
-        message: '카드 결제 중에는 동전이 반환됩니다.',
+        message: "카드 결제 중에는 동전이 반환됩니다.",
       };
     }
 
     if (amount >= 1000) {
-      if (!this.VALID_BILLS.includes(amount as (typeof this.VALID_BILLS)[number])) {
+      if (
+        !this.VALID_BILLS.includes(amount as (typeof this.VALID_BILLS)[number])
+      ) {
         return {
           success: false,
-          message: '지원하지 않는 지폐입니다.',
+          message: "지원하지 않는 지폐입니다.",
         };
       }
     } else {
-      if (!this.VALID_COINS.includes(amount as (typeof this.VALID_COINS)[number])) {
+      if (
+        !this.VALID_COINS.includes(amount as (typeof this.VALID_COINS)[number])
+      ) {
         this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
         return {
           success: false,
-          message: '지원하지 않는 동전입니다.',
+          message: "지원하지 않는 동전입니다.",
         };
       }
     }
@@ -66,13 +73,13 @@ export class MoneyManager {
       if (amount >= 1000) {
         return {
           success: false,
-          message: '잔액이 10,000원을 초과하여 지폐를 투입할 수 없습니다.',
+          message: "잔액이 10,000원을 초과하여 지폐를 투입할 수 없습니다.",
         };
       }
       this.returnedMoney[amount] = (this.returnedMoney[amount] || 0) + 1;
       return {
         success: false,
-        message: '잔액이 10,000원을 초과하여 동전이 반환됩니다.',
+        message: "잔액이 10,000원을 초과하여 동전이 반환됩니다.",
       };
     }
 
@@ -96,20 +103,24 @@ export class MoneyManager {
    */
   returnMoney(): { returnedMoney: { [key: number]: number }; message: string } {
     if (this.balance === 0) {
-      return { returnedMoney: this.returnedMoney, message: '' };
+      return { returnedMoney: this.returnedMoney, message: "" };
     }
 
     let remainingAmount = this.balance;
     const denominations = [10000, 5000, 1000, 500, 100];
 
-    denominations.forEach(denomination => {
-      if (remainingAmount >= denomination && this.changeCounts[denomination] > 0) {
+    denominations.forEach((denomination) => {
+      if (
+        remainingAmount >= denomination &&
+        this.changeCounts[denomination] > 0
+      ) {
         const count = Math.min(
           Math.floor(remainingAmount / denomination),
           this.changeCounts[denomination]
         );
         if (count > 0) {
-          this.returnedMoney[denomination] = (this.returnedMoney[denomination] || 0) + count;
+          this.returnedMoney[denomination] =
+            (this.returnedMoney[denomination] || 0) + count;
           remainingAmount -= denomination * count;
           this.changeCounts[denomination] -= count;
         }
@@ -122,7 +133,7 @@ export class MoneyManager {
 
     return {
       returnedMoney,
-      message: '거스름돈이 반환되었습니다.',
+      message: "거스름돈이 반환되었습니다.",
     };
   }
 

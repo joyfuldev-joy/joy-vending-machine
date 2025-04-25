@@ -5,15 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --mode development --open",
-    "build": "webpack --mode production",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,scss,css,html}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,scss,css,html}\""
+    "build": "webpack --mode production"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.11.0",
     "html-webpack-plugin": "^5.5.0",
-    "prettier": "^3.5.3",
     "sass": "^1.87.0",
     "sass-loader": "^16.0.5",
     "style-loader": "^3.3.4",

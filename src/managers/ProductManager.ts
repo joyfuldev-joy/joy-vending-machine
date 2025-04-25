@@ -1,19 +1,20 @@
-import { Product } from '../types';
+import { Product } from "../types";
 
 export class ProductManager {
-  private products: Product[];
+  private products: Product[] = [
+    { id: "cola", name: "콜라", price: 1100, quantity: 10 },
+    { id: "water", name: "물", price: 600, quantity: 10 },
+    { id: "coffee", name: "커피", price: 700, quantity: 10 },
+  ];
+
   private dispensedDrinks: { [key: string]: number } = {};
 
   constructor() {
-    this.products = [
-      { id: 'water', name: '물', price: 1000, quantity: 10 },
-      { id: 'coke', name: '콜라', price: 1500, quantity: 10 },
-      { id: 'coffee', name: '커피', price: 2000, quantity: 10 },
-    ];
+    // Constructor code if needed
   }
 
   getProduct(productId: string): Product | undefined {
-    return this.products.find(p => p.id === productId);
+    return this.products.find((product) => product.id === productId);
   }
 
   canPurchase(productId: string): boolean {
@@ -21,18 +22,25 @@ export class ProductManager {
     return product ? product.quantity > 0 : false;
   }
 
-  purchase(productId: string): boolean {
+  purchase(productId: string): void {
     const product = this.getProduct(productId);
-    if (!product || !this.canPurchase(productId)) {
-      return false;
+    if (product && product.quantity > 0) {
+      product.quantity--;
+      this.dispensedDrinks[productId] =
+        (this.dispensedDrinks[productId] || 0) + 1;
     }
+  }
 
-    product.quantity--;
-    if (!this.dispensedDrinks[productId]) {
-      this.dispensedDrinks[productId] = 0;
-    }
-    this.dispensedDrinks[productId]++;
-    return true;
+  getAllProducts(): Product[] {
+    return [...this.products];
+  }
+
+  getProducts(): Product[] {
+    return this.products;
+  }
+
+  hasDispensedDrinks(): boolean {
+    return Object.keys(this.dispensedDrinks).length > 0;
   }
 
   getDispensedDrinks(): { [key: string]: number } {
@@ -48,10 +56,6 @@ export class ProductManager {
     return product ? product.quantity : 0;
   }
 
-  getAllProducts(): Product[] {
-    return [...this.products];
-  }
-
   getProductPrice(productId: string): number {
     const product = this.getProduct(productId);
     return product ? product.price : 0;
@@ -59,28 +63,16 @@ export class ProductManager {
 
   getProductName(productId: string): string {
     const product = this.getProduct(productId);
-    return product ? product.name : '';
-  }
-
-  hasDispensedDrinks(): boolean {
-    return Object.keys(this.dispensedDrinks).length > 0;
+    return product ? product.name : "";
   }
 
   getDispensedDrinksDisplay(): string {
     return Object.entries(this.dispensedDrinks)
       .map(([id, count]) => {
         const product = this.getProduct(id);
-        return product ? `${product.name} x ${count}` : '';
+        return product ? `${product.name} x ${count}` : "";
       })
-      .filter(text => text)
-      .join('<br>');
-  }
-
-  /**
-   * Get all products
-   * @returns Array of all products
-   */
-  getProducts(): Product[] {
-    return Object.values(this.products);
+      .filter((text) => text)
+      .join("<br>");
   }
 }
